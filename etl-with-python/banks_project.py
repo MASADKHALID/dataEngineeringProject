@@ -42,7 +42,7 @@ def transform(df, csv_path):
     df['MC_EUR_Billion'] = round(df['Market cap (US$ billion)'] * exchange_rate['EUR'], 2)
     df['MC_INR_Billion'] = round(df['Market cap (US$ billion)'] * exchange_rate['INR'], 2)
 
-    ic(df['MC_EUR_Billion'][4])
+    print(df['MC_EUR_Billion'][4])
 
     log_progress('Data transformation complete. Initiating Loading process')
 
@@ -66,22 +66,6 @@ def load_to_db(df, sql_connection, table_name):
 
     log_progress('Data loaded to Database as a table, Executing queries')
 
-
-def run_query(query_statement, sql_connection):
-    """ This function runs the query on the database table and
-    prints the output on the terminal. Function returns nothing. """
-
-    cursor = sql_connection.cursor()
-    cursor.execute(query_statement)
-    result = cursor.fetchall()
-    # for row in result:
-    #     ic(row)
-
-    log_progress('Process Complete')
-
-    return result
-
-
 if __name__ == '__main__':
     url = 'https://web.archive.org/web/20230908091635/https://en.wikipedia.org/wiki/List_of_largest_banks'
     output_csv_path = './output/Largest_banks_data.csv'
@@ -91,7 +75,7 @@ if __name__ == '__main__':
     log_progress('Preliminaries complete. Initiating ETL process')
     #
 
-    df = ic(extract(url, 'By market capitalization'))
+    df = extract(url, 'By market capitalization')
 
     transform(df, './input/exchange_rate.csv')
 
@@ -99,9 +83,4 @@ if __name__ == '__main__':
 
     with sqlite3.connect(database_name) as conn:
         load_to_db(df, conn, table_name)
-
-        ic(run_query('SELECT * FROM Largest_banks', conn))
-
-        ic(run_query('SELECT AVG(MC_GBP_Billion) FROM Largest_banks', conn))
-
-        ic(run_query('SELECT "Bank name" FROM Largest_banks LIMIT 5', conn))
+    log_progress("DATAFRAME HAS BEEN UPLOADED")
